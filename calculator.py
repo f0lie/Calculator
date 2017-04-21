@@ -14,7 +14,7 @@ MASTER_PAT = re.compile('|'.join([NAME, NUM, PLUS, TIMES, EQ, WS]))
 Token = collections.namedtuple('Token', ['type', 'value'])
 
 def gen_tokens(text):
-    # Generates tokens of a string
+    "Generates tokens of a string"
     scanner = MASTER_PAT.scanner(text)
     for match in iter(scanner.match, None):
         tok = Token(match.lastgroup, match.group())
