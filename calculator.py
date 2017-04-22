@@ -51,6 +51,8 @@ class ExpressionEvaluator:
         if not self._accept(tok_type):
             raise SyntaxError('Expected' + tok_type)
 
+    # Grammar Rules
+
     def expr(self):
         "expr ::= term { ('+'|'-') term }* "
 
