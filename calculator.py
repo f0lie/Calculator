@@ -22,6 +22,9 @@ MASTER_PAT = re.compile('|'.join([NUM, PLUS, MINUS, POW, TIMES,
 # Tokenizer
 Token = collections.namedtuple('Token', ['type', 'value'])
 
+# Query
+Query = collections.namedtuple('Query', 'text result')
+
 def gen_tokens(text):
     'Yields tokens within given string'
     scanner = MASTER_PAT.scanner(text)
@@ -33,13 +36,18 @@ def gen_tokens(text):
 class ExpressionEvaluator:
     'Recursive descent parser'
 
+    def __init__(self):
+        self.history = []
+
     def parse(self, text):
         'Main func to process expressions and return values'
         self.tokens = gen_tokens(text) # Feeds tokens
         self.tok = None # Last token consumed
         self.next_tok = None # Next token
         self._advance() # Load first token
-        return self.expr()
+        val = self.expr()
+        self.history.append(Query(text, val))
+        return val
 
     def _advance(self):
         'Advance one token ahead'
