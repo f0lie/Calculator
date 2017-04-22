@@ -1,5 +1,6 @@
 import re
 import collections
+import math
 
 # Token specification
 NUM    = r'(?P<NUM>\d+)'
@@ -10,9 +11,10 @@ DIVIDE = r'(?P<DIVIDE>/)'
 LPAREN = r'(?P<LPAREN>\()'
 RPAREN = r'(?P<RPAREN>\))'
 WS     = r'(?P<WS>\s+)'
+FACT   = r'(?P<FACT>!)'
 
 MASTER_PAT = re.compile('|'.join([NUM, PLUS, MINUS, TIMES,
-                                  DIVIDE, LPAREN, RPAREN, WS]))
+                                  DIVIDE, LPAREN, RPAREN, WS, FACT]))
 
 # Tokenizer
 Token = collections.namedtuple('Token', ['type','value'])
@@ -85,8 +87,11 @@ class ExpressionEvaluator:
 
     def factor(self):
         "factor ::= NUM | ( expr )"
-
-        if self._accept('NUM'):
+        
+        if self._accept('FACT'):
+            factval = self.factor()
+            return math.factorial(factval)
+        elif self._accept('NUM'):
             return int(self.tok.value)
         elif self._accept('LPAREN'):
             exprval = self.expr() # Began at the "top"
