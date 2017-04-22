@@ -98,7 +98,7 @@ class ExpressionEvaluator:
         return termval
 
     def pow(self):
-        "pow ::= factor '**' factor"
+        "pow ::= factor { ('**'|'^') factor }*"
 
         powval = self.factor()
 
@@ -109,7 +109,7 @@ class ExpressionEvaluator:
         return powval
 
     def factor(self):
-        "factor ::= NUM | ( expr )"
+        "factor ::= ['!'], NUM | ( expr )"
 
         if self._accept('FACT'):
             factval = self.factor()
