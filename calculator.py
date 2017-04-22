@@ -14,7 +14,7 @@ LPAREN = r'(?P<LPAREN>\()'
 RPAREN = r'(?P<RPAREN>\))'
 WS     = r'(?P<WS>\s+)'
 FACT   = r'(?P<FACT>!)'
-POW    = r'(?P<POW>\*\*)'
+POW    = r'(?P<POW>\*\*|\^)'
 
 MASTER_PAT = re.compile('|'.join([NUM, PLUS, MINUS, POW, TIMES,
                                   DIVIDE, LPAREN, RPAREN, WS, FACT]))
