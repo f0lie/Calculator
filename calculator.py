@@ -1,3 +1,5 @@
+'Doing stuff with parsing expressions. Takes mainly from Python Cookbook'
+
 import re
 import collections
 import math
@@ -17,17 +19,18 @@ MASTER_PAT = re.compile('|'.join([NUM, PLUS, MINUS, TIMES,
                                   DIVIDE, LPAREN, RPAREN, WS, FACT]))
 
 # Tokenizer
-Token = collections.namedtuple('Token', ['type','value'])
+Token = collections.namedtuple('Token', ['type', 'value'])
 
 def gen_tokens(text):
+    'Yields tokens within given string'
     scanner = MASTER_PAT.scanner(text)
-    for m in iter(scanner.match, None):
-        tok = Token(m.lastgroup, m.group())
+    for match in iter(scanner.match, None):
+        tok = Token(match.lastgroup, match.group())
         if tok.type != 'WS':
             yield tok
 
 class ExpressionEvaluator:
-    "Recursive descent parser"
+    'Recursive descent parser'
 
     def parse(self, text):
         'Main func to process expressions and return values'
@@ -61,11 +64,11 @@ class ExpressionEvaluator:
         exprval = self.term() # Grab left* term
 
         while self._accept('PLUS') or self._accept('MINUS'): # Process repeating operations
-            op = self.tok.type
+            oper = self.tok.type
             right = self.term()
-            if op == 'PLUS':
+            if oper == 'PLUS':
                 exprval += right
-            elif op == 'MINUS':
+            elif oper == 'MINUS':
                 exprval -= right
 
         return exprval
@@ -76,18 +79,18 @@ class ExpressionEvaluator:
         termval = self.factor() # Grab left* factor
 
         while self._accept('TIMES') or self._accept('DIVIDE'): # Process repeating operations
-            op = self.tok.type
+            oper = self.tok.type
             right = self.term()
-            if op == 'TIMES':
+            if oper == 'TIMES':
                 termval *= right
-            elif op == 'DIVIDE':
+            elif oper == 'DIVIDE':
                 termval /= right
 
         return termval
 
     def factor(self):
         "factor ::= NUM | ( expr )"
-        
+
         if self._accept('FACT'):
             factval = self.factor()
             return math.factorial(factval)
