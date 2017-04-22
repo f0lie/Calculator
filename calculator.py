@@ -14,8 +14,9 @@ LPAREN = r'(?P<LPAREN>\()'
 RPAREN = r'(?P<RPAREN>\))'
 WS     = r'(?P<WS>\s+)'
 FACT   = r'(?P<FACT>!)'
+POW    = r'(?P<POW>\*\*)'
 
-MASTER_PAT = re.compile('|'.join([NUM, PLUS, MINUS, TIMES,
+MASTER_PAT = re.compile('|'.join([NUM, PLUS, MINUS, POW, TIMES,
                                   DIVIDE, LPAREN, RPAREN, WS, FACT]))
 
 # Tokenizer
@@ -74,19 +75,30 @@ class ExpressionEvaluator:
         return exprval
 
     def term(self):
-        "term ::= factor { ('*'|'/') factor }*"
+        "term ::= pow { ('*'|'/') pow }*"
 
-        termval = self.factor() # Grab left* factor
+        termval = self.pow() # Grab left* pow
 
         while self._accept('TIMES') or self._accept('DIVIDE'): # Process repeating operations
             oper = self.tok.type
-            right = self.term()
+            right = self.pow()
             if oper == 'TIMES':
                 termval *= right
             elif oper == 'DIVIDE':
                 termval /= right
 
         return termval
+
+    def pow(self):
+        "pow ::= factor '**' factor"
+
+        powval = self.factor()
+
+        while self._accept('POW'):
+            right = self.factor()
+            powval = int(math.pow(powval, right))
+
+        return powval
 
     def factor(self):
         "factor ::= NUM | ( expr )"
@@ -101,4 +113,4 @@ class ExpressionEvaluator:
             self._expect('RPAREN')
             return exprval
         else:
-            raise SyntaxError('Expected NUMBER or PAREN')
+            raise SyntaxError('Expected NUMBER or PAREN. Received: ' + repr(self.tok))
