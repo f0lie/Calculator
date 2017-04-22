@@ -1,5 +1,5 @@
 # Calculator
-Recursive descent parser writen in Python. Currently implements power, minus, plus, multiple, divide, and parathesises.
+Recursive descent parser writen in Python. Most of the code is from Python Cookbook, I added some more operations. Currently implements power, minus, plus, multiple, divide, and parathesises.
 # Usage
 Import calculator and create ExpressionEvaluator. Then use parse(text) method to eval strings.
 ```python
