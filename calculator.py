@@ -83,13 +83,13 @@ class ExpressionEvaluator:
         return exprval
 
     def term(self):
-        "term ::= pow { ('*'|'/') pow }*"
+        "term ::= factor { ('*'|'/') factor }*"
 
-        termval = self.pow() # Grab left* pow
+        termval = self.factor() # Grab left* pow
 
         while self._accept('TIMES') or self._accept('DIVIDE'): # Process repeating operations
             oper = self.tok.type
-            right = self.pow()
+            right = self.factor()
             if oper == 'TIMES':
                 termval *= right
             elif oper == 'DIVIDE':
@@ -97,22 +97,22 @@ class ExpressionEvaluator:
 
         return termval
 
-    def pow(self):
-        "pow ::= factor { ('**'|'^') factor }*"
+    def factor(self):
+        "factor ::= base { ('**'|'^') exponent }*"
 
-        powval = self.factor()
+        powval = self.base()
 
         while self._accept('POW'):
-            right = self.factor()
+            right = self.exponent()
             powval = int(math.pow(powval, right))
 
         return powval
 
-    def factor(self):
-        "factor ::= ['!'], NUM | ( expr )"
+    def base(self):
+        "base ::= ['!'] NUM | ( expr )"
 
         if self._accept('FACT'):
-            factval = self.factor()
+            factval = self.base()
             return math.factorial(factval)
         elif self._accept('NUM'):
             return int(self.tok.value)
@@ -122,3 +122,6 @@ class ExpressionEvaluator:
             return exprval
         else:
             raise SyntaxError('Expected NUMBER or PAREN. Received: ' + repr(self.tok))
+
+    # Clarifies grammar rules
+    exponent = base
