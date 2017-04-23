@@ -3,9 +3,11 @@
 import re
 import collections
 import math
+import numbers
 
 # Token specification
 NUM    = r'(?P<NUM>\d+)'
+NAME   = r'(?P<NAME>\w+)'
 PLUS   = r'(?P<PLUS>\+)'
 MINUS  = r'(?P<MINUS>-)'
 TIMES  = r'(?P<TIMES>\*)'
@@ -16,7 +18,7 @@ WS     = r'(?P<WS>\s+)'
 FACT   = r'(?P<FACT>!)'
 POW    = r'(?P<POW>\*\*|\^)'
 
-MASTER_PAT = re.compile('|'.join([NUM, PLUS, MINUS, POW, TIMES,
+MASTER_PAT = re.compile('|'.join([NUM, NAME, PLUS, MINUS, POW, TIMES,
                                   DIVIDE, LPAREN, RPAREN, WS, FACT]))
 
 # Tokenizer
@@ -63,7 +65,7 @@ class ExpressionEvaluator:
     def _expect(self, tok_type):
         'Consume token and raise SyntaxError if tok_type does not match'
         if not self._accept(tok_type):
-            raise SyntaxError('Expected' + tok_type)
+            raise SyntaxError('Expected ' + tok_type)
 
     # Grammar Rules
 
@@ -109,19 +111,32 @@ class ExpressionEvaluator:
         return powval
 
     def base(self):
-        "base ::= ['!'] NUM | ( expr )"
+        "base ::= ['!'] NUM | name | ( expr )"
 
         if self._accept('FACT'):
             factval = self.base()
             return math.factorial(factval)
         elif self._accept('NUM'):
             return int(self.tok.value)
+        elif self._accept('NAME'):
+            return self.name()
         elif self._accept('LPAREN'):
             exprval = self.expr() # Began at the "top"
             self._expect('RPAREN')
             return exprval
         else:
-            raise SyntaxError('Expected NUMBER or PAREN. Received: ' + repr(self.tok))
+            raise SyntaxError('Expected NUMBER or PAREN')
+
+    def name(self):
+        "name ::= NAME"
+        name = getattr(math, self.tok.value)
+        if isinstance(name, numbers.Number):
+            return name
+        elif isinstance(name, collections.Callable):
+            self._expect('LPAREN')
+            args = self.expr()
+            self._expect('RPAREN')
+            return name(args)
 
     # Clarifies grammar rules
     exponent = base
