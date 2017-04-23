@@ -87,7 +87,7 @@ class ExpressionEvaluator:
     def term(self):
         "term ::= factor { ('*'|'/') factor }*"
 
-        termval = self.factor() # Grab left* pow
+        termval = self.factor() # Grab left* factor
 
         while self._accept('TIMES') or self._accept('DIVIDE'): # Process repeating operations
             oper = self.tok.type
@@ -102,13 +102,13 @@ class ExpressionEvaluator:
     def factor(self):
         "factor ::= base { ('**'|'^') exponent }*"
 
-        powval = self.base()
+        baseval = self.base() # Grab left* base
 
-        while self._accept('POW'):
+        while self._accept('POW'): # Process repeating exponents
             right = self.exponent()
-            powval = int(math.pow(powval, right))
+            baseval = int(math.pow(baseval, right))
 
-        return powval
+        return baseval
 
     def base(self):
         "base ::= ['!'] NUM | name | ( expr )"
@@ -129,10 +129,11 @@ class ExpressionEvaluator:
 
     def name(self):
         "name ::= NAME"
-        name = getattr(math, self.tok.value)
-        if isinstance(name, numbers.Number):
+
+        name = getattr(math, self.tok.value) # Passes received strings to math module
+        if isinstance(name, numbers.Number): # Check for constants
             return name
-        elif isinstance(name, collections.Callable):
+        elif isinstance(name, collections.Callable): # Check for functions
             self._expect('LPAREN')
             args = self.expr()
             self._expect('RPAREN')
